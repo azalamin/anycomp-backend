@@ -3,7 +3,7 @@ import { loginSchema } from "./auth.schema";
 import { authService } from "./auth.service";
 
 const login = async (req: Request, res: Response) => {
-	// ✅ Zod validation
+	// Zod validation
 	const { email, password } = loginSchema.parse(req.body);
 
 	const result = await authService.login(email, password);
