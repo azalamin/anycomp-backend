@@ -1,6 +1,7 @@
 import {
 	Column,
 	CreateDateColumn,
+	DeleteDateColumn,
 	Entity,
 	OneToMany,
 	PrimaryGeneratedColumn,
@@ -47,4 +48,7 @@ export class Specialist {
 
 	@UpdateDateColumn()
 	updated_at!: Date;
+
+	@DeleteDateColumn()
+	deleted_at!: Date;
 }

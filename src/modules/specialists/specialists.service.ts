@@ -44,6 +44,8 @@ const getAllSpecialists = async (query: any) => {
 
 	const qb = specialistRepo.createQueryBuilder("specialist");
 
+	qb.where("specialist.deleted_at IS NULL");
+
 	if (status === "draft") qb.andWhere("specialist.is_draft = true");
 	if (status === "published") qb.andWhere("specialist.is_draft = false");
 
@@ -53,9 +55,22 @@ const getAllSpecialists = async (query: any) => {
 		});
 	}
 
-	qb.skip((page - 1) * limit).take(limit);
+	const [data, total] = await qb
+		.skip((page - 1) * limit)
+		.take(limit)
+		.getManyAndCount();
 
-	return qb.getManyAndCount();
+	const totalPages = Math.ceil(total / limit);
+
+	return {
+		data,
+		meta: {
+			total,
+			page: Number(page),
+			limit: Number(limit),
+			totalPages,
+		},
+	};
 };
 
 const publishSpecialist = async (id: string) => {
@@ -69,8 +84,48 @@ const publishSpecialist = async (id: string) => {
 	return specialistRepo.save(specialist);
 };
 
+const updateSpecialist = async (id: string, payload: any) => {
+	const specialist = await specialistRepo.findOne({
+		where: { id },
+		relations: ["media", "service_offerings"],
+	});
+
+	if (!specialist) {
+		throw new AppError("Specialist not found", 404);
+	}
+
+	// Update scalar fields
+	Object.assign(specialist, payload);
+
+	// Replace media if provided
+	if (payload.media) {
+		specialist.media = payload.media.map((m: any) => Object.assign(new Media(), m));
+	}
+
+	// Replace services if provided
+	if (payload.service_offerings) {
+		specialist.service_offerings = payload.service_offerings.map((s: any) =>
+			Object.assign(new ServiceOffering(), s)
+		);
+	}
+
+	return specialistRepo.save(specialist);
+};
+
+const deleteSpecialist = async (id: string) => {
+	const specialist = await specialistRepo.findOne({ where: { id } });
+
+	if (!specialist) {
+		throw new AppError("Specialist not found", 404);
+	}
+
+	await specialistRepo.softDelete(id);
+};
+
 export const specialistService = {
 	createSpecialist,
 	getAllSpecialists,
 	publishSpecialist,
+	updateSpecialist,
+	deleteSpecialist,
 };
