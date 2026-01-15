@@ -1,3 +1,4 @@
+import { Not } from "typeorm";
 import { AppDataSource } from "../../config/data-source";
 import { Media } from "../../entities/Media";
 import { PlatformFee } from "../../entities/PlatformFee";
@@ -16,12 +17,12 @@ const generateUniqueSlug = async (title: string, id?: string) => {
 
 	while (true) {
 		const existing = await specialistRepo.findOne({
-			where: { slug },
+			where: id
+				? { slug, id: Not(id) } // update
+				: { slug }, // create
 		});
 
-		// If creating → no id yet
-		// If updating → allow same record
-		if (!existing || (id && existing.id === id)) {
+		if (!existing) {
 			break;
 		}
 
@@ -154,17 +155,23 @@ const updateSpecialist = async (id: string, payload: any) => {
 		throw new AppError("Specialist not found", 404);
 	}
 
-	// Update scalar fields
-	Object.assign(specialist, payload);
-
-	// Replace media if provided
-	if (payload.media) {
-		specialist.media = payload.media.map((m: any) => Object.assign(new Media(), m));
+	// Regenerate slug only if title changes
+	if (payload.title && payload.title !== specialist.title) {
+		specialist.slug = await generateUniqueSlug(payload.title, id);
 	}
 
-	// Replace services if provided
-	if (payload.service_offerings) {
-		specialist.service_offerings = payload.service_offerings.map((s: any) =>
+	// Update scalar fields (exclude relations)
+	const { media, service_offerings, ...rest } = payload;
+	Object.assign(specialist, rest);
+
+	// Replace media if provided
+	if (media) {
+		specialist.media = media.map((m: any) => Object.assign(new Media(), m));
+	}
+
+	// Replace service offerings if provided
+	if (service_offerings) {
+		specialist.service_offerings = service_offerings.map((s: any) =>
 			Object.assign(new ServiceOffering(), s)
 		);
 	}
