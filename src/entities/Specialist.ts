@@ -3,6 +3,7 @@ import {
 	CreateDateColumn,
 	DeleteDateColumn,
 	Entity,
+	Index,
 	OneToMany,
 	PrimaryGeneratedColumn,
 	UpdateDateColumn,
@@ -17,6 +18,10 @@ export class Specialist {
 
 	@Column()
 	title!: string;
+
+	@Index(["slug"], { unique: true })
+	@Column({ nullable: false })
+	slug!: string;
 
 	@Column("text")
 	description!: string;

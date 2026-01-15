@@ -21,6 +21,15 @@ const getAllSpecialistsHandler: RequestHandler = async (req, res) => {
 	});
 };
 
+const getSingleSpecialistHandler: RequestHandler = async (req, res) => {
+	const specialist = await specialistService.getSingleSpecialist(req.params.id as string);
+
+	res.status(200).json({
+		success: true,
+		data: specialist,
+	});
+};
+
 const publishSpecialistHandler: RequestHandler = async (req, res) => {
 	const specialist = await specialistService.publishSpecialist(req.params.id as string);
 
@@ -52,4 +61,5 @@ export const specialistController = {
 	publishSpecialistHandler,
 	updateSpecialistHandler,
 	deleteSpecialistHandler,
+	getSingleSpecialistHandler,
 };

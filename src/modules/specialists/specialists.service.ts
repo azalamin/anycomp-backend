@@ -4,9 +4,33 @@ import { PlatformFee } from "../../entities/PlatformFee";
 import { ServiceOffering } from "../../entities/ServiceOffering";
 import { Specialist } from "../../entities/Specialist";
 import { AppError } from "../../utils/AppError";
+import { slugify } from "../../utils/slugify";
 
 const specialistRepo = AppDataSource.getRepository(Specialist);
 const platformFeeRepo = AppDataSource.getRepository(PlatformFee);
+
+const generateUniqueSlug = async (title: string, id?: string) => {
+	const baseSlug = slugify(title);
+	let slug = baseSlug;
+	let count = 1;
+
+	while (true) {
+		const existing = await specialistRepo.findOne({
+			where: { slug },
+		});
+
+		// If creating → no id yet
+		// If updating → allow same record
+		if (!existing || (id && existing.id === id)) {
+			break;
+		}
+
+		slug = `${baseSlug}-${count}`;
+		count++;
+	}
+
+	return slug;
+};
 
 const createSpecialist = async (payload: any) => {
 	const platformFee = await platformFeeRepo.findOne({
@@ -23,8 +47,11 @@ const createSpecialist = async (payload: any) => {
 	const platformFeeAmount =
 		(payload.base_price * Number(platformFee.platform_fee_percentage)) / 100;
 
+	const slug = await generateUniqueSlug(payload.title);
+
 	const specialist = specialistRepo.create({
 		title: payload.title,
+		slug,
 		description: payload.description,
 		base_price: payload.base_price,
 		platform_fee: platformFeeAmount,
@@ -71,6 +98,24 @@ const getAllSpecialists = async (query: any) => {
 			totalPages,
 		},
 	};
+};
+
+const getSingleSpecialist = async (id: string) => {
+	const specialist = await specialistRepo.findOne({
+		where: { id },
+		relations: ["media", "service_offerings"],
+		order: {
+			media: {
+				display_order: "ASC",
+			},
+		},
+	});
+
+	if (!specialist) {
+		throw new AppError("Specialist not found", 404);
+	}
+
+	return specialist;
 };
 
 const publishSpecialist = async (id: string) => {
@@ -128,4 +173,5 @@ export const specialistService = {
 	publishSpecialist,
 	updateSpecialist,
 	deleteSpecialist,
+	getSingleSpecialist,
 };
