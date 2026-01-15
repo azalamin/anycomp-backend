@@ -84,6 +84,8 @@ Password: admin123
 
 ## 📑 API Overview
 
+Live API: https://anycomp-backend.up.railway.app
+
 ### Specialists
 
 | Method | Endpoint                       | Description                                        |
