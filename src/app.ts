@@ -3,6 +3,7 @@ import express from "express";
 import { authRouter } from "./modules/auth/auth.route";
 import { mediaRouter } from "./modules/media/media.route";
 import { platformFeeRouter } from "./modules/platform-fee/platformFee.route";
+import { serviceOfferingRouter } from "./modules/service-offerings/serviceOffering.route";
 import { specialistRouter } from "./modules/specialists/specialists.route";
 
 const app = express();
@@ -17,6 +18,8 @@ app.use("/api/auth", authRouter);
 app.use("/api/platform-fees", platformFeeRouter);
 
 app.use("/api/media", mediaRouter);
+
+app.use("/api/service-offerings", serviceOfferingRouter);
 
 app.get("/health", (_req, res) => {
 	res.json({ status: "OK", message: "Backend is running " });
