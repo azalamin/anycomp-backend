@@ -14,3 +14,4 @@ Thumbs.db
 *.tsbuildinfo
 ormconfig.json
 coverage/
+.vercel

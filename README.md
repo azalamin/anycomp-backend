@@ -84,7 +84,7 @@ Password: admin123
 
 ## 📑 API Overview
 
-Live API: https://anycomp-backend.up.railway.app
+Live API: https://anycomp-backend-flax.vercel.app
 
 ### Specialists
 
