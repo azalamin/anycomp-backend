@@ -2,6 +2,7 @@ import { Column, Entity, Index, ManyToOne, PrimaryGeneratedColumn } from "typeor
 import { Specialist } from "./Specialist";
 
 @Entity({ name: "media" })
+@Index(["specialist"])
 export class Media {
 	@PrimaryGeneratedColumn("uuid")
 	id!: string;
@@ -15,7 +16,6 @@ export class Media {
 	@Column()
 	display_order!: number;
 
-	@Index()
 	@ManyToOne(() => Specialist, specialist => specialist.media, {
 		onDelete: "CASCADE",
 	})

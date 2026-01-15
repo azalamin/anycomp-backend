@@ -12,6 +12,9 @@ import { Media } from "./Media";
 import { ServiceOffering } from "./ServiceOffering";
 
 @Entity({ name: "specialists" })
+@Index(["slug"], { unique: true })
+@Index(["is_draft"])
+@Index(["created_at"])
 export class Specialist {
 	@PrimaryGeneratedColumn("uuid")
 	id!: string;
@@ -19,7 +22,6 @@ export class Specialist {
 	@Column()
 	title!: string;
 
-	@Index(["slug"], { unique: true })
 	@Column({ nullable: false })
 	slug!: string;
 

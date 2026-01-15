@@ -1,6 +1,7 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, Index, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: "platform_fee" })
+@Index(["min_value", "max_value"])
 export class PlatformFee {
 	@PrimaryGeneratedColumn("uuid")
 	id!: string;
