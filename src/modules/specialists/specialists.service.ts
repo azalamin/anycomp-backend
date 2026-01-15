@@ -67,27 +67,40 @@ const createSpecialist = async (payload: any) => {
 };
 
 const getAllSpecialists = async (query: any) => {
-	const { status, search, page = 1, limit = 10 } = query;
+	const { status, search, page = 1, limit = 10, sortBy = "created_at", order = "desc" } = query;
 
 	const qb = specialistRepo.createQueryBuilder("specialist");
 
+	// Soft delete protection
 	qb.where("specialist.deleted_at IS NULL");
 
+	// Draft / Published filter
 	if (status === "draft") qb.andWhere("specialist.is_draft = true");
 	if (status === "published") qb.andWhere("specialist.is_draft = false");
 
+	// Search
 	if (search) {
 		qb.andWhere("specialist.title ILIKE :search", {
 			search: `%${search}%`,
 		});
 	}
 
+	// SORTING
+	const allowedSortFields = ["created_at", "final_price", "base_price"] as const;
+
+	const sortField = allowedSortFields.includes(sortBy) ? sortBy : "created_at";
+
+	const sortOrder = order?.toUpperCase() === "ASC" ? "ASC" : "DESC";
+
+	qb.orderBy(`specialist.${sortField}`, sortOrder);
+
+	// Pagination
 	const [data, total] = await qb
-		.skip((page - 1) * limit)
-		.take(limit)
+		.skip((Number(page) - 1) * Number(limit))
+		.take(Number(limit))
 		.getManyAndCount();
 
-	const totalPages = Math.ceil(total / limit);
+	const totalPages = Math.ceil(total / Number(limit));
 
 	return {
 		data,
@@ -96,6 +109,8 @@ const getAllSpecialists = async (query: any) => {
 			page: Number(page),
 			limit: Number(limit),
 			totalPages,
+			sortBy: sortField,
+			order: sortOrder,
 		},
 	};
 };
