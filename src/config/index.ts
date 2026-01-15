@@ -26,7 +26,6 @@ const config = {
 	db_password: env.DB_PASSWORD,
 	db_name: env.DB_NAME,
 
-	// 🔥 THIS IS THE KEY
 	jwt_secret: env.JWT_SECRET,
 	jwt_expires_in: env.JWT_EXPIRES_IN as jwt.SignOptions["expiresIn"],
 };
